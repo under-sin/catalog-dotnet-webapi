@@ -19,6 +19,7 @@ namespace Catalog.Controllers
             this.repository = repository;
         }
 
+        // GET ITEMS /items
         [HttpGet]
         public IEnumerable<ItemDto> GetItems()
         {
@@ -26,6 +27,7 @@ namespace Catalog.Controllers
             return items;
         }
 
+        // GET ITEM /items/{id}
         [HttpGet("{id}")]
         public ActionResult<ItemDto> GetItem(Guid id)
         {
@@ -39,6 +41,7 @@ namespace Catalog.Controllers
             return Ok(item.AsDto());
         }
 
+        // CREATE /items
         [HttpPost]
         public ActionResult<ItemDto> CreateItem(CreateItemDto itemDto)
         {
@@ -54,6 +57,44 @@ namespace Catalog.Controllers
 
             // return location with route value at requisition header
             return CreatedAtAction(nameof(GetItem), new { id = item.Id }, item.AsDto());
+        }
+
+        // UPDATE /items/{id}
+        [HttpPut("{id}")]
+        public ActionResult UpdateItem(Guid id, UpdateItemDto itemDto)
+        {
+            var existingItem = repository.GetItem(id);
+
+            if (existingItem is null)
+            {
+                return NotFound();
+            }
+
+            Item updateItem = existingItem with
+            {
+                Name = itemDto.Name,
+                Price = itemDto.Price
+            };
+            
+            repository.UpdateItem(updateItem);
+
+            return NoContent();
+        }
+
+        // DELETE /items/{id}
+        [HttpDelete("{id}")]
+        public ActionResult DeleteItem(Guid id)
+        {
+            var existingItem = repository.GetItem(id);
+
+            if (existingItem is null) 
+            {
+                return NotFound();
+            }
+            
+            repository.DeleteItem(id);
+
+            return NoContent();
         }
     }
 }
